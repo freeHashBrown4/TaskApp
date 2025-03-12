@@ -127,17 +127,22 @@ struct TaskListView: View {
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     selectedTask = task
-                                    showEditTaskSheet = true
+                                    // Add a small delay to ensure task is set before sheet is presented
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        showEditTaskSheet = true
+                                    }
                                 }
                                 .contextMenu {
                                     Button(action: {
                                         selectedTask = task
-                                        showEditTaskSheet = true
+                                        // Add a small delay to ensure task is set before sheet is presented
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                            showEditTaskSheet = true
+                                        }
                                     }) {
                                         Label("Edit Task", systemImage: "pencil")
                                     }
-                                }
-                                .contextMenu {
+                                    
                                     Button(role: .destructive, action: {
                                         taskToDelete = task.id
                                         showDeleteConfirmation = true
@@ -201,18 +206,18 @@ struct TaskListView: View {
                 }
             )
         }
-        .sheet(isPresented: $showEditTaskSheet) {
-            if let task = selectedTask {
-                TaskEditSheetView(
-                    viewModel: TaskEditViewModel(task: task),
-                    isPresented: $showEditTaskSheet,
-                    accentColor: accentColor,
-                    secondaryAccentColor: secondaryAccentColor,
-                    onSave: { updatedTask in
-                        viewModel.updateTask(updatedTask)
-                    }
-                )
-            }
+        .sheet(isPresented: $showEditTaskSheet, onDismiss: {
+            selectedTask = nil
+        }) {
+            TaskEditSheetView(
+                viewModel: TaskEditViewModel(task: selectedTask ?? Task(id: nil, title: "", dueDate: "", description: "", priority: "medium", status: "pending")),
+                isPresented: $showEditTaskSheet,
+                accentColor: accentColor,
+                secondaryAccentColor: secondaryAccentColor,
+                onSave: { updatedTask in
+                    viewModel.updateTask(updatedTask)
+                }
+            )
         }
         .alert("Delete Task", isPresented: $showDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
