@@ -15,6 +15,15 @@ struct Task: Codable, Identifiable {
     var description: String
     var priority: String
     var status: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "_id" // Map Swift 'id' to MongoDB '_id'
+        case title
+        case dueDate
+        case description
+        case priority
+        case status
+    }
 }
 
 
